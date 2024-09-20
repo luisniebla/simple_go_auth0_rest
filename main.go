@@ -128,6 +128,18 @@ func (ro Routes) checkWord(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("Thanks!")
 }
 
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization, Access-Control-Allow-Origin, Content-Type")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading the .env file: %v", err)
@@ -145,8 +157,12 @@ func main() {
 
 	r := mux.NewRouter()
 
-	// https://github.com/gorilla/mux?tab=readme-ov-file#middleware
+	r.Use(corsMiddleware)
 
+	log.Printf("hello world")
+	// https://github.com/gorilla/mux?tab=readme-ov-file#middleware
+	var dir = "./static"
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 	r.HandleFunc("/words/{wordID}", routes.getWord).Methods("GET")
 	r.HandleFunc("/decks/{deckID}", routes.getDeck).Methods("GET")
 
