@@ -13,7 +13,7 @@ const Login = () => {
 }
 
 const privateApiRequest = async (token) => {
-  return fetch('http://localhost:8080/api/private', {
+  return fetch('http://localhost:8080/api/login', {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Access-Control-Allow-Origin': '*'
@@ -33,8 +33,8 @@ const AuthedComponent = ({ }) => {
   return <><div>{message}</div><button onClick={async () => {
     const token = await getAccessTokenSilently()
     const json = await privateApiRequest(token)
-    setMessage(json.message)
-  }}>Request</button>
+    setMessage(json.name)
+  }}>Login</button>
   </>
 
 }

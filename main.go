@@ -9,6 +9,9 @@ import (
 	"time"
 
 	"example.com/simple_rest/middleware"
+	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"
+
+	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -169,12 +172,31 @@ func main() {
 	// Apply auth middleware to specific endpoints
 	r.Handle("/private", middleware.EnsureValidToken()(http.HandlerFunc(routes.checkWord)))
 
-	// This route is only accessible if the user has a valid access_token.
-	r.Handle("/api/private", middleware.EnsureValidToken()(
+	r.Handle("/api/login", middleware.EnsureValidToken()(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token := r.Context().Value(jwtmiddleware.ContextKey{}).(*validator.ValidatedClaims)
+			claims := token.CustomClaims.(*middleware.CustomClaims)
+
+			if !claims.HasScope("read:current_user") {
+				w.WriteHeader(http.StatusForbidden)
+				w.Write([]byte(`{"message":"Insufficient scope."}`))
+				return
+			}
+			userInfo, err := userInfoFromAuth0(r.Header.Get("Authorization"))
+			if err != nil {
+				fmt.Print(err)
+				return
+			}
+			userInfoJson, err := json.Marshal(userInfo)
+			if err != nil {
+				fmt.Print(err)
+				return
+			}
 			w.Header().Set("Content-Type", "application/json")
+			w.Write(userInfoJson)
+
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this."}`))
+			// w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this."}`))
 		}),
 	))
 

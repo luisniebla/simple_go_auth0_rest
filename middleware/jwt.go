@@ -55,7 +55,7 @@ func EnsureValidToken() func(next http.Handler) http.Handler {
 		log.Printf("Encountered error while validating JWT: %v", err)
 
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnauthorized)
+		//w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(`{"message":"Failed to validate JWT."}`))
 	}
 

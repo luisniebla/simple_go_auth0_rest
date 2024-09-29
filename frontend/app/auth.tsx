@@ -9,7 +9,7 @@ export default function Auth0({ children }) {
             authorizationParams={{
                 redirect_uri: 'http://localhost:3001',
                 audience: "https://dev-fteqbjgrbz4fpbco.us.auth0.com/api/v2/",
-                scope: "read:current_user update:current_user_metadata"
+                scope: "read:current_user update:current_user_metadata read:messages"
             }}
         >
             {children}
