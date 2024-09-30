@@ -12,8 +12,11 @@ import (
 
 type User struct {
 	gorm.Model
-	FirstName string
-	LastName  string
+	Name          string            `gorm:"string" json:"Name"` // will not export if not cpaitalized
+	email         string            `json:"email"`
+	user_metadata map[string]string `json:"user_metadata"`
+	picture       string            `json:"picture"`
+	user_id       string            `json:"user_id"`
 }
 
 func userInfoFromAuth0(authHeader string) (map[string]interface{}, error) {
@@ -41,8 +44,6 @@ func userInfoFromAuth0(authHeader string) (map[string]interface{}, error) {
 
 	// interface{} can hold values of any type, so map looks like {string: interface}
 	var userInfo map[string]interface{} // interfaces are sets of method signatures. value can hold any value that implements those methods
-
-	fmt.Print(json.Unmarshal(body, &userInfo))
-	fmt.Print(userInfo)
+	json.Unmarshal(body, &userInfo)
 	return userInfo, nil
 }

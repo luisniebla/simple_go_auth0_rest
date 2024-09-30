@@ -155,7 +155,7 @@ func main() {
 
 	// Migrate the schema
 	db.AutoMigrate(&DBWord{})
-
+	db.AutoMigrate(&User{})
 	routes := Routes{DB: db}
 
 	r := mux.NewRouter()
@@ -195,8 +195,11 @@ func main() {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(userInfoJson)
 
+			db.Create(&User{
+				Name: userInfo["name"].(string),
+			})
+
 			w.WriteHeader(http.StatusOK)
-			// w.Write([]byte(`{"message":"Hello from a private endpoint! You need to be authenticated to see this."}`))
 		}),
 	))
 
